@@ -2,7 +2,7 @@ from django import template
 
 register = template.Library()
 
-ЦЕНЗУРИРУЕМЫЕ_СЛОВА = ['редиска', 'Редиска']  # Добавьте больше слов сюда
+censored_words = ['редиска', 'Редиска']  # Добавьте больше слов сюда
 
 @register.filter(name='censor')
 def censor(value):
@@ -22,7 +22,7 @@ def censor(value):
     words = value.split()
     censored_text = []
     for word in words:
-        if word in ЦЕНЗУРИРУЕМЫЕ_СЛОВА:
+        if word in censored_words:
             censored_word = word[0] + '*' * (len(word) - 1)
             censored_text.append(censored_word)
         else:

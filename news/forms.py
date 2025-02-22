@@ -1,4 +1,5 @@
 from django import forms
+from .models import Post, Category
 
 class NewsSearchForm(forms.Form):
     title = forms.CharField(label='Название', required=False)
@@ -8,3 +9,16 @@ class NewsSearchForm(forms.Form):
     def clean_date_after(self): # Если нужно, добавляем валидацию даты
         date_after = self.cleaned_data.get('date_after')
         return date_after
+
+
+class PostForm(forms.ModelForm):
+    categories = forms.ModelMultipleChoiceField(
+        queryset=Category.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label='Категории'
+    )
+
+    class Meta:
+        model = Post
+        fields = ['title', 'text', 'categories']
