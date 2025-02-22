@@ -3,5 +3,6 @@ from . import views
 
 urlpatterns = [
     path('news/', views.news_list, name='news_list'),
-    path('news/<int:news_id>/', views.news_detail, name='news_detail'), # Предполагается, что у вас передается ID новости
+    path('news/<int:news_id>/', views.news_detail, name='news_detail'),
+    path('news/search/', views.news_search, name='news_search'), #URL для поиска
 ]
