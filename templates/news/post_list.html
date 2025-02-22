@@ -12,10 +12,10 @@
     <a href="{% url 'articles_create' %}" class="btn btn-primary">Создать статью</a>
 
     <ul class="list-group">
-        {% for post in page_obj %}
+        {% for post in posts %}
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <div>
-                    <h3><a href="{% url 'news_detail' pk=post.pk %}">{{ post.title|censor }}</a></h3>
+                    <h3><a href="{% url 'news_detail' news_id=post.pk %}">{{ post.title|censor }}</a></h3>
                     <p class="text-muted">{{ post.date_created|date:"d.m.Y" }}</p>
                     <p>{{ post.text|censor|truncatewords:20 }}</p>
                 </div>

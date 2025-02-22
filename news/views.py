@@ -1,9 +1,10 @@
 from django.shortcuts import render, get_object_or_404
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Post, Author
 from .forms import PostForm, NewsSearchForm  # Создадим PostForm ниже
 from django.core.paginator import Paginator
+from django.http import HttpResponseRedirect
 
 class PostList(ListView):
     model = Post
@@ -36,7 +37,7 @@ class BasePostCreate(CreateView):
     model = Post
     form_class = PostForm
     template_name = 'news/post_edit.html'  # Убедитесь, что этот шаблон существует
-    success_url = reverse_lazy('post_list')
+    # success_url = reverse_lazy('post_list')  #  Удаляем, т.к. переопределяем метод
 
     def form_valid(self, form):
         post = form.save(commit=False)
@@ -44,7 +45,11 @@ class BasePostCreate(CreateView):
         author = Author.objects.get(user=self.request.user)  # Get Author instance
         post.author = author
         post.post_type = self.post_type
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        return response
+
+    def get_success_url(self):
+        return reverse('news_list')  # Перенаправляем на news_list
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -64,7 +69,11 @@ class BasePostUpdate(UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'news/post_edit.html'  # Убедитесь, что этот шаблон существует
-    success_url = reverse_lazy('news:post_list')
+
+    # success_url = reverse_lazy('post_list') #  Удаляем, т.к. переопределяем метод
+
+    def get_success_url(self):
+        return reverse('news_list')  # Перенаправляем на news_list
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -84,7 +93,11 @@ class ArticleUpdate(BasePostUpdate):
 class BasePostDelete(DeleteView):
     model = Post
     template_name = 'news/post_delete.html'  # Убедитесь, что этот шаблон существует
-    success_url = reverse_lazy('news:post_list')
+
+    # success_url = reverse_lazy('post_list') #  Удаляем, т.к. переопределяем метод
+
+    def get_success_url(self):
+        return reverse('news_list')  # Перенаправляем на news_list
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -100,8 +113,9 @@ class NewsDelete(BasePostDelete):
 class ArticleDelete(BasePostDelete):
     pass
 
+
 def news_search(request):
-    form = NewsSearchForm(request.GET) # Заполняем форму данными из GET-запроса
+    form = NewsSearchForm(request.GET)  # Заполняем форму данными из GET-запроса
     news = Post.objects.all()  # Получаем все новости (изначально)
 
     if form.is_valid():
@@ -111,13 +125,14 @@ def news_search(request):
 
         # Фильтрация
         if title:
-            news = news.filter(title__icontains=title) #Поиск по названию
+            news = news.filter(title__icontains=title)  # Поиск по названию
 
         if author:
-            news = news.filter(author__user__username__icontains=author) #Поиск по автору (предполагается поле author в модели)
+            news = news.filter(
+                author__user__username__icontains=author)  # Поиск по автору (предполагается поле author в модели)
 
         if date_after:
-            news = news.filter(date_created__gte=date_after) #Дата позже указанной
+            news = news.filter(date_created__gte=date_after)  # Дата позже указанной
 
     context = {
         'form': form,
